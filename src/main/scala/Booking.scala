@@ -12,7 +12,7 @@ case class Room(
                  booked: Boolean)
 object Room {
   implicit val roomsOrdering = new Ordering[Room] {
-    override def compare(x: Room, y: Room): Int = x.rating compareTo y.rating
+    override def compare(x: Room, y: Room): Int = y.rating compareTo x.rating
   }
 }
 
@@ -24,7 +24,7 @@ object BookingSystem {
 
   val pickAvailable: List[Room] => List[Room] = _.filter(!_.booked)
   val filterWithView: List[Room] => List[Room] = _.filter(_.view)
-  val sortByRating: List[Room] => List[Room] = Sorter.roomsSorter.sort
+  val sortByRating: List[Room] => List[Room] = _.sorted
 
   // available & with View & has best rating
   val proposeBest: Booking => Room = ((booking: Booking) => booking.rooms) >>>
