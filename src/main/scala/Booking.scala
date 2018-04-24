@@ -19,7 +19,11 @@ object Functions {
   val sortByRating: List[Room] => List[Room] = _.sortBy(_.rating)
 
   // available & with View & has best rating
-  val proposeBest: Booking => Room = ???
+  val proposeBest: Booking => Room = ((booking: Booking) => booking.rooms) andThen
+                                      pickAvailable andThen
+                                      filterWithView andThen
+                                      sortByRating andThen
+                                      (rooms => rooms.head)
 
 }
 
