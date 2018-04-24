@@ -1,4 +1,6 @@
 
+import cats.implicits._
+
 case class Room(
                  no: String,
                  floor: Int,
@@ -19,10 +21,10 @@ object BookingSystem {
   val sortByRating: List[Room] => List[Room] = QuickSort.sort
 
   // available & with View & has best rating
-  val proposeBest: Booking => Room = ((booking: Booking) => booking.rooms) andThen
-                                      pickAvailable andThen
-                                      filterWithView andThen
-                                      sortByRating andThen
+  val proposeBest: Booking => Room = ((booking: Booking) => booking.rooms) >>>
+                                      pickAvailable >>>
+                                      filterWithView >>>
+                                      sortByRating >>>
                                       (rooms => rooms.head)
 
 }
