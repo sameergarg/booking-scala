@@ -10,13 +10,13 @@ case class Room(
 
 case class Booking(rooms: List[Room])
 
-object Functions {
+object BookingSystem {
 
   val costPerPerson: Room => Double = room => room.price / room.capacity
 
   val pickAvailable: List[Room] => List[Room] = _.filter(!_.booked)
   val filterWithView: List[Room] => List[Room] = _.filter(_.view)
-  val sortByRating: List[Room] => List[Room] = _.sortBy(_.rating)
+  val sortByRating: List[Room] => List[Room] = QuickSort.sort
 
   // available & with View & has best rating
   val proposeBest: Booking => Room = ((booking: Booking) => booking.rooms) andThen
