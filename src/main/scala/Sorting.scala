@@ -1,14 +1,14 @@
 import scala.math.Ordering
 
 
-class Sorter[A] {
-  def sort(as: List[A])(implicit ord: Ordering[A]): List[A] = {
+class Sorter {
+  def sort[A: Ordering](as: List[A]): List[A] = {
     as.sorted.reverse
   }
 }
 
 object Sorter {
-  implicit val roomsSorter = new Sorter[Room]
+  implicit val roomsSorter = new Sorter
 }
 
 
