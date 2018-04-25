@@ -13,8 +13,8 @@ object Main extends App {
     Room("5", 0, view = true, capacity = 4, price = 140.0, rating = 4.6, booked = List.empty)
   ))
 
-  val best: Room = proposeBest(booking)
-  println(s"Best: $best and cost per person is: ${costPerPersonForBest(booking)}")
+  val best: Room = proposeBest(booking, Period(LocalDate.now(), LocalDate.now().plusDays(1)), 2)
+  println(s"Best: $best and cost per person is: ${costPerPersonForBest(booking, Period(LocalDate.now(), LocalDate.now().plusDays(1)), 2)}")
   assert(best.no == "4")
 
 }

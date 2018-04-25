@@ -1,6 +1,6 @@
 import java.time.LocalDate
 
-import Domain.Room
+import Domain._
 import cats.implicits._
 
 import scala.math.Ordering
@@ -12,7 +12,9 @@ object Domain {
   type Price = Double
 
   case class Period(from: LocalDate, to: LocalDate)
+
   case class Guest(firstName: String, lastName: String)
+
   case class Reservation(id: ReservationId, period: Period, guest: Guest)
 
   case class Room(
@@ -32,27 +34,33 @@ object Domain {
 
 
   case class Booking(rooms: List[Room] = List.empty[Room])
-}
 
+}
 
 
 case class Booking(rooms: List[Room])
 
 object BookingSystem {
 
-  val costPerPerson: Room => Double = room => room.price / room.capacity
-
-  val pickAvailable: List[Room] => List[Room] = _.filter(_.booked.isEmpty)
+  val pickAvailable: (Period, List[Room]) => List[Room] = (period, rooms) => rooms.filter(!_.booked.map(_.period).contains(period))
   val filterWithView: List[Room] => List[Room] = _.filter(_.view)
+  val canAccommodate: (NoPpl, List[Room]) => List[Room] = (noPpl, rooms) => rooms.filter(_.capacity >= noPpl)
+
   val sortByRating: List[Room] => List[Room] = _.sorted
 
-  // available & with View & has best rating
-  val proposeBest: Booking => Room = ((booking: Booking) => booking.rooms) >>>
-                                      pickAvailable >>>
-                                      filterWithView >>>
-                                      sortByRating >>>
-                                      (rooms => rooms.head)
+  val costPerPerson: Room => Double = room => room.price / room.capacity
 
-  val costPerPersonForBest: Booking => Double = proposeBest >>> costPerPerson
+  // available & with View & has best rating
+  val proposeBest: (Booking, Period, NoPpl) => Room = { (booking, period, noPpl) =>
+
+    val roomWithCapacity: List[Room] => List[Room] = canAccommodate.curried(noPpl)
+    val roomNotBooked: List[Room] => List[Room] = pickAvailable.curried(period)
+
+    val best: List[Room] => Room = roomWithCapacity >>> roomNotBooked >>> filterWithView >>> sortByRating >>> (rooms => rooms.head)
+
+    best(booking.rooms)
+  }
+
+  val costPerPersonForBest: (Booking, Period, NoPpl) => Double = Function.untupled(proposeBest.tupled >>> costPerPerson)
 }
 
