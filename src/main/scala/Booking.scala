@@ -48,7 +48,7 @@ object BookingSystem {
 
   val sortByRating: List[Room] => List[Room] = _.sorted
 
-  val costPerPerson: Room => Double = room => room.price / room.capacity
+  val costPerPerson: Option[Room] => Option[Double] = _.map(room => room.price / room.capacity)
 
   // available & with View & has best rating
   val proposeBest: (Booking, Period, NoPpl) => Option[Room] = { (booking, period, noPpl) =>
@@ -61,6 +61,6 @@ object BookingSystem {
     best(booking.rooms)
   }
 
-  val costPerPersonForBest: (Booking, Period, NoPpl) => Option[Double] = Function.untupled(proposeBest.tupled >>> (mayBeRoom => mayBeRoom.map(costPerPerson)))
+  val costPerPersonForBest: (Booking, Period, NoPpl) => Option[Double] = Function.untupled(proposeBest.tupled >>> costPerPerson)
 }
 
