@@ -50,7 +50,7 @@ object BookingSystem {
 
   val sortByRating: List[Room] => List[Room] = _.sorted
 
-  def costPerPerson[F[_]: Functor]: F[Room] => F[Double] = _.map(room => room.price / room.capacity)
+  def costPerPerson[F[_] : Functor]: F[Room] => F[Double] = _.map(room => room.price / room.capacity)
 
   // available & with View & has best rating
   val proposeBest: (Booking, Period, NoPpl) => Option[Room] = { (booking, period, noPpl) =>
@@ -67,13 +67,15 @@ object BookingSystem {
 
   val isAffordable: (Room, Price) => Boolean = (room, affordablePrice) => room.price < affordablePrice
 
+  def affordableFor[F[_] : Functor](room: F[Room], price: Price): F[Boolean] = {
+    val value: F[Price => Boolean] = room.map(isAffordable.curried)
+    ???
+  }
+
   def affordableFor[F[_] : Applicative](room: F[Room], price: F[Price]): F[Boolean] = for {
     r <- room
     p <- price
-  } yield(isAffordable(r,p))
+  } yield (isAffordable(r, p))
 
-  def affordableFor[F[_] : Applicative](room: F[Room], price: Price): F[Boolean] = for {
-    r <- room
-  } yield(isAffordable(r, price))
 }
 
