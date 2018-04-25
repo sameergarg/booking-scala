@@ -1,7 +1,9 @@
 import java.time.LocalDate
 
 import Domain._
+import cats.Functor
 import cats.implicits._
+import language.higherKinds
 
 import scala.math.Ordering
 
@@ -48,7 +50,7 @@ object BookingSystem {
 
   val sortByRating: List[Room] => List[Room] = _.sorted
 
-  val costPerPerson: Option[Room] => Option[Double] = _.map(room => room.price / room.capacity)
+  def costPerPerson[F[_]: Functor]: F[Room] => F[Double] = _.map(room => room.price / room.capacity)
 
   // available & with View & has best rating
   val proposeBest: (Booking, Period, NoPpl) => Option[Room] = { (booking, period, noPpl) =>
