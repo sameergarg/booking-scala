@@ -1,10 +1,10 @@
 import java.time.LocalDate
 
 import Domain._
-import cats.Functor
+import cats.{Applicative, Functor}
 import cats.implicits._
-import language.higherKinds
 
+import language.higherKinds
 import scala.math.Ordering
 
 object Domain {
@@ -64,5 +64,16 @@ object BookingSystem {
   }
 
   val costPerPersonForBest: (Booking, Period, NoPpl) => Option[Double] = Function.untupled(proposeBest.tupled >>> costPerPerson)
+
+  val isAffordable: (Room, Price) => Boolean = (room, affordablePrice) => room.price < affordablePrice
+
+  def affordableFor[F[_] : Applicative](room: F[Room], price: F[Price]): F[Boolean] = for {
+    r <- room
+    p <- price
+  } yield(isAffordable(r,p))
+
+  def affordableFor[F[_] : Applicative](room: F[Room], price: Price): F[Boolean] = for {
+    r <- room
+  } yield(isAffordable(r, price))
 }
 

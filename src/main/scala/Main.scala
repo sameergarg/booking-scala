@@ -2,6 +2,7 @@ import java.time.LocalDate
 
 import BookingSystem._
 import Domain._
+import cats.implicits._
 
 object Main extends App {
 
@@ -13,8 +14,12 @@ object Main extends App {
     Room("5", 0, view = true, capacity = 4, price = 140.0, rating = 4.6, booked = List(Reservation(1, Period(LocalDate.of(2018,1,1), LocalDate.of(2018, 1, 2)), Guest("john","major"))))
   ))
 
-  val best = proposeBest(booking, Period(LocalDate.now(), LocalDate.now().plusDays(1)), 2)
+  val best: Option[Room] = proposeBest(booking, Period(LocalDate.now(), LocalDate.now().plusDays(1)), 2)
   println(s"Best: $best and cost per person is: ${costPerPersonForBest(booking, Period(LocalDate.now(), LocalDate.now().plusDays(1)), 2)}")
   assert(best.map(_.no) == Some("4"))
 
+
+  type Validation[A] = Either[String, A]
+  val fRoom: Validation[Room] = Left("No room left")
+  costPerPerson[Validation].apply(fRoom)
 }
