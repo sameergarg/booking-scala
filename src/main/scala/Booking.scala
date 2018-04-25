@@ -51,16 +51,16 @@ object BookingSystem {
   val costPerPerson: Room => Double = room => room.price / room.capacity
 
   // available & with View & has best rating
-  val proposeBest: (Booking, Period, NoPpl) => Room = { (booking, period, noPpl) =>
+  val proposeBest: (Booking, Period, NoPpl) => Option[Room] = { (booking, period, noPpl) =>
 
     val roomWithCapacity: List[Room] => List[Room] = canAccommodate.curried(noPpl)
     val roomNotBooked: List[Room] => List[Room] = pickAvailable.curried(period)
 
-    val best: List[Room] => Room = roomWithCapacity >>> roomNotBooked >>> filterWithView >>> sortByRating >>> (rooms => rooms.head)
+    val best: List[Room] => Option[Room] = roomWithCapacity >>> roomNotBooked >>> filterWithView >>> sortByRating >>> (rooms => rooms.headOption)
 
     best(booking.rooms)
   }
 
-  val costPerPersonForBest: (Booking, Period, NoPpl) => Double = Function.untupled(proposeBest.tupled >>> costPerPerson)
+  val costPerPersonForBest: (Booking, Period, NoPpl) => Option[Double] = Function.untupled(proposeBest.tupled >>> (mayBeRoom => mayBeRoom.map(costPerPerson)))
 }
 
