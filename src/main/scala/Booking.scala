@@ -1,7 +1,7 @@
 import java.time.LocalDate
 
 import Domain._
-import cats.{Applicative, Apply, Functor}
+import cats.{Applicative, Apply, Functor, Monad}
 import cats.implicits._
 
 import language.higherKinds
@@ -76,10 +76,11 @@ object BookingSystem {
     (room, price).mapN(isAffordable)
 
   //same as propose best but all arguments are wrapped in effect
-  def bestFor[F[_]: Applicative](
+  def bestFor[F[_]: Monad](
                                   booking: F[Booking],
                                   fetchPeriod: Booking => F[Period],
                                   fetchNoPpl: Booking => F[NoPpl]
-                                ): F[Option[Room]]  = ???
+                                ): F[Option[Room]]  =
+    (booking, Monad[F].flatMap(booking)(fetchPeriod), Monad[F].flatMap(booking)(fetchNoPpl)).mapN(proposeBest)
 }
 
