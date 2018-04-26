@@ -73,7 +73,7 @@ object BookingSystem {
   }
 
   def affordableFor[F[_] : Applicative](room: F[Room], price: F[Price]): F[Boolean] =
-    Applicative[F].ap2(isAffordable.pure[F])(room, price)
+    (room |@| price)(isAffordable)
 
 }
 
