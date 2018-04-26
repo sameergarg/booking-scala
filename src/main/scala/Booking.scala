@@ -69,7 +69,7 @@ object BookingSystem {
 
   def affordableFor[F[_] : Applicative](room: F[Room], price: Price): F[Boolean] = {
     val fPriceToAff: F[Price => Boolean] = room.map(isAffordable.curried)
-    Applicative[F].ap(fPriceToAff)(price.pure)
+    Applicative[F].ap(fPriceToAff)(price.pure[F])
   }
 
   def affordableFor[F[_] : Applicative](room: F[Room], price: F[Price]): F[Boolean] = ???
