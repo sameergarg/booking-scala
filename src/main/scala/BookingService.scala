@@ -18,7 +18,7 @@ class BookingService {
   }
 
   // returns current reservation id
-  def currentReservationId(booking: Booking): ReservationId = ???
+  def currentReservationId(booking: Booking): ReservationId = booking.rooms.flatMap(_.booked).map(_.id).foldLeft(0)(math.max(_, _))
 
   // fetches room by number
   def fetchRoom(booking: Booking)(no: String): Option[Room] = ???
