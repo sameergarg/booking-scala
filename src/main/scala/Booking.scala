@@ -76,9 +76,10 @@ object BookingSystem {
     (room, price).mapN(isAffordable)
 
   //same as propose best but all arguments are wrapped in effect
-  def bestFor[F[_] : Applicative](booking: F[Booking],
-                                  period: F[Period],
-                                  noPpl: F[NoPpl]
-                                 ): F[Option[Room]] = (booking, period, noPpl)(proposeBest)
+  def bestFor[F[_]: Applicative](
+                                  booking: F[Booking],
+                                  fetchPeriod: Booking => F[Period],
+                                  fetchNoPpl: Booking => F[NoPpl]
+                                ): F[Option[Room]]  = ???
 }
 
