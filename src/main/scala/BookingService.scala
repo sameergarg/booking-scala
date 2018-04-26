@@ -9,7 +9,13 @@ class BookingService {
                floor: Int,
                view: Boolean,
                capacity: Int
-             ): (Booking, Room) = ???
+             ): (Booking, Room) = {
+    val newRoom = RoomGenerator.generateRoom(no, floor, view, capacity)
+    (
+      booking.copy(rooms = newRoom :: booking.rooms, events = RoomAdded(newRoom.no):: booking.events),
+      newRoom
+    )
+  }
 
   // returns current reservation id
   def currentReservationId(booking: Booking): ReservationId = ???
