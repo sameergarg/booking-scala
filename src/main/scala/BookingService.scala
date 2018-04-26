@@ -1,4 +1,4 @@
-import Domain.Event.RoomAdded
+import Domain.Event.{RoomAdded, RoomFetched}
 import Domain._
 
 class BookingService {
@@ -21,7 +21,10 @@ class BookingService {
   def currentReservationId(booking: Booking): ReservationId = booking.rooms.flatMap(_.booked).map(_.id).foldLeft(0)(math.max(_, _))
 
   // fetches room by number
-  def fetchRoom(booking: Booking)(no: String): Option[Room] = ???
+  def fetchRoom(booking: Booking)(no: String): (Booking, Option[Room]) = (
+    booking.copy(events = RoomFetched(no)::booking.events),
+    booking.rooms.filter(_.no == no).headOption
+  )
 
   // books a guest to a room for a given period
   def book(booking: Booking)(
