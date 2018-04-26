@@ -1,11 +1,13 @@
 import java.time.LocalDate
 
 import Domain._
-import cats.{Applicative, Apply, Functor}
-import cats.implicits._
+import scalaz.Functor
 
 import language.higherKinds
 import scala.math.Ordering
+
+import scalaz.Scalaz._
+import scalaz._
 
 object Domain {
 
@@ -69,7 +71,7 @@ object BookingSystem {
 
   def affordableFor[F[_] : Applicative](room: F[Room], price: Price): F[Boolean] = {
     val fPriceToAff: F[Price => Boolean] = room.map(isAffordable.curried)
-    Applicative[F].ap(fPriceToAff)(price.pure)
+    Applicative[F].ap(price.point[F])(fPriceToAff)
   }
 
   def affordableFor[F[_] : Applicative](room: F[Room], price: F[Price]): F[Boolean] = ???

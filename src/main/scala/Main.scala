@@ -2,7 +2,7 @@ import java.time.LocalDate
 
 import BookingSystem._
 import Domain._
-import cats.implicits._
+import scalaz.Scalaz._
 
 object Main extends App {
 
