@@ -8,6 +8,14 @@ object Domain {
   type ReservationId = Int
   type Price = Double
 
+  sealed trait Event
+
+  object Event {
+    case class RoomFetched(no: String) extends Event
+    case class RoomAdded(no: String) extends Event
+    case class ReservationMade(id: ReservationId) extends Event
+  }
+
   case class Period(from: LocalDate, to: LocalDate)
 
   case class Guest(firstName: String, lastName: String)
@@ -29,8 +37,10 @@ object Domain {
     }
   }
 
-
-  case class Booking(rooms: List[Room] = List.empty[Room])
+  case class Booking(
+                      rooms: List[Room] = List.empty[Room],
+                      events: List[Event] = List.empty[Event]
+                    )
 
 }
 
