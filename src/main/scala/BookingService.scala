@@ -1,4 +1,4 @@
-import Domain.Event.{RoomAdded, RoomFetched}
+import Domain.Event.{ReservationMade, RoomAdded, RoomFetched}
 import Domain._
 
 class BookingService {
@@ -31,7 +31,14 @@ class BookingService {
             room: Room,
             period: Period,
             guest: Guest,
-            reservationId: ReservationId): Booking = ???
+            reservationId: ReservationId): Booking = {
+    val roomReserved = room.copy(booked = Reservation(reservationId, period, guest)::room.booked)
+    val otherRooms = booking.rooms.filter(_ != room)
+    booking.copy(
+      rooms = roomReserved :: otherRooms,
+      events = ReservationMade(reservationId) :: booking.events
+    )
+  }
 
   // book vor VIP = book given room, if it does not exist then build it
   def bookVip(
