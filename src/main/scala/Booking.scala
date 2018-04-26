@@ -1,7 +1,7 @@
 import java.time.LocalDate
 
 import Domain._
-import cats.{Applicative, Functor}
+import cats.{Applicative, Apply, Functor}
 import cats.implicits._
 
 import language.higherKinds
@@ -67,15 +67,12 @@ object BookingSystem {
 
   val isAffordable: (Room, Price) => Boolean = (room, affordablePrice) => room.price < affordablePrice
 
-  def affordableFor[F[_] : Functor](room: F[Room], price: Price): F[Boolean] = {
-    val value: F[Price => Boolean] = room.map(isAffordable.curried)
-    ???
+  def affordableFor[F[_] : Applicative](room: F[Room], price: Price): F[Boolean] = {
+    val fPriceToAff: F[Price => Boolean] = room.map(isAffordable.curried)
+    Applicative[F].ap(fPriceToAff)(price.pure)
   }
 
-  def affordableFor[F[_] : Applicative](room: F[Room], price: F[Price]): F[Boolean] = for {
-    r <- room
-    p <- price
-  } yield (isAffordable(r, p))
+  def affordableFor[F[_] : Applicative](room: F[Room], price: F[Price]): F[Boolean] = ???
 
 }
 
