@@ -79,6 +79,6 @@ object BookingSystem {
   def bestFor[F[_] : Applicative](booking: F[Booking],
                                   period: F[Period],
                                   noPpl: F[NoPpl]
-                                 ): F[Option[Room]] = ???
+                                 ): F[Option[Room]] = (booking, period, noPpl)(proposeBest)
 }
 
