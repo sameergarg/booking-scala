@@ -68,8 +68,8 @@ object BookingSystem {
   val isAffordable: (Room, Price) => Boolean = (room, affordablePrice) => room.price < affordablePrice
 
   def affordableFor[F[_] : Applicative](room: F[Room], price: Price): F[Boolean] = {
-    val fPriceToAff: F[Price => Boolean] = room.map(isAffordable.curried)
-    Applicative[F].ap(fPriceToAff)(price.pure[F])
+    val fPriceToAff = room.map(isAffordable.curried)
+    fPriceToAff <*> price.pure[F]
   }
 
   def affordableFor[F[_] : Applicative](room: F[Room], price: F[Price]): F[Boolean] = ???
