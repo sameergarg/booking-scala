@@ -81,6 +81,10 @@ object BookingSystem {
                                   fetchPeriod: Booking => F[Period],
                                   fetchNoPpl: Booking => F[NoPpl]
                                 ): F[Option[Room]]  =
-    (booking, Monad[F].flatMap(booking)(fetchPeriod), Monad[F].flatMap(booking)(fetchNoPpl)).mapN(proposeBest)
+    for {
+      b       <- booking
+      period  <- fetchPeriod(b)
+      noPpl   <- fetchNoPpl(b)
+    } yield proposeBest(b, period, noPpl)
 }
 
