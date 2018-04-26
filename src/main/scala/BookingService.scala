@@ -1,27 +1,28 @@
+import Domain.Event.RoomAdded
 import Domain._
 
 class BookingService {
 
   // adds room to booking, stores an event
-  def addRoom(
+  def addRoom(booking: Booking)(
                no: String,
                floor: Int,
                view: Boolean,
                capacity: Int
-             ): Room = ???
+             ): (Booking, Room) = ???
 
   // returns current reservation id
-  def currentReservationId: ReservationId = ???
+  def currentReservationId(booking: Booking): ReservationId = ???
 
   // fetches room by number
-  def fetchRoom(no: String): Option[Room] = ???
+  def fetchRoom(booking: Booking)(no: String): Option[Room] = ???
 
   // books a guest to a room for a given period
-  def book(
+  def book(booking: Booking)(
             room: Room,
             period: Period,
             guest: Guest,
-            reservationId: ReservationId): Unit = ???
+            reservationId: ReservationId): Booking = ???
 
   // book vor VIP = book given room, if it does not exist then build it
   def bookVip(
@@ -30,6 +31,16 @@ class BookingService {
                view: Boolean,
                capacity: Int,
                period: Period
-             )(guest: Guest): ReservationId = ???
+             )(guest: Guest): Booking = ???
 
+}
+
+object RoomGenerator {
+  def generateRoom(
+                    no: String,
+                    floor: Int,
+                    view: Boolean,
+                    capacity: Int
+                  ): Room =
+    Room(no, floor, view, capacity, capacity * 100, 10.0, booked = List.empty[Reservation])
 }
