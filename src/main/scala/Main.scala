@@ -2,6 +2,7 @@ import java.time.LocalDate
 
 import BookingService.BookingState
 import Domain._
+import IOOperations._
 
 object Main extends App {
 
@@ -12,5 +13,12 @@ object Main extends App {
     resId2 <- BookingService.bookVip("102", floor = 1, view = true, capacity = 5, period)(guest)
   } yield List(resId1, resId2)
 
-  println(program.run(Booking()).value)
+  val reservationIds = for {
+    initBooking <- fetchBooking()
+    (booking, resIds) = program.run(initBooking).value
+    _ <- updateBooking(booking)
+  } yield resIds
+
+  reservationIds.unsafeRunAsync(_.foreach(println))
+
 }

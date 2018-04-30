@@ -1,9 +1,9 @@
 import Domain.Booking
 import cats.effect.{IO, Sync}
 
-class IOOperations {
+object IOOperations {
 
-  object InMemoryDB {
+  private object InMemoryDB {
     //has to be var as it needs to capture changing state
     var booking: Booking = new Booking()
   }
