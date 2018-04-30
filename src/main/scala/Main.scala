@@ -1,25 +1,16 @@
 import java.time.LocalDate
 
-import BookingSystem._
+import BookingService.BookingState
 import Domain._
-import cats.implicits._
 
 object Main extends App {
 
-  val booking = Booking(List(
-    Room("1", 0, view = true, capacity = 5, price = 100.0, rating = 3.2, booked = List.empty),
-    Room("2", 0, view = true, capacity = 3, price = 150.0, rating = 9.2, booked = List(Reservation(1, Period(LocalDate.now(), LocalDate.now().plusDays(1)), Guest("john","senior")))),
-    Room("3", 0, view = false, capacity = 3, price = 120.0, rating = 8.4, booked = List(Reservation(1, Period(LocalDate.now(), LocalDate.now().plusDays(1)), Guest("john","major")))),
-    Room("4", 0, view = true, capacity = 4, price = 140.0, rating = 7.2, booked = List.empty),
-    Room("5", 0, view = true, capacity = 4, price = 140.0, rating = 4.6, booked = List(Reservation(1, Period(LocalDate.of(2018,1,1), LocalDate.of(2018, 1, 2)), Guest("john","major"))))
-  ))
+  val guest = Guest("John", "Major")
+  val period = Period(LocalDate.of(2017, 1, 8), LocalDate.of(2017, 1, 12))
+  private val value: BookingState[List[ReservationId]] = for {
+    resId1 <- BookingService.bookVip("101", floor = 1, view = true, capacity = 5, period)(guest)
+    resId2 <- BookingService.bookVip("102", floor = 1, view = true, capacity = 5, period)(guest)
+  } yield List(resId1, resId2)
 
-  val best: Option[Room] = proposeBest(booking, Period(LocalDate.now(), LocalDate.now().plusDays(1)), 2)
-  println(s"Best: $best and cost per person is: ${costPerPersonForBest(booking, Period(LocalDate.now(), LocalDate.now().plusDays(1)), 2)}")
-  assert(best.map(_.no) == Some("4"))
-
-
-  type Validation[A] = Either[String, A]
-  val fRoom: Validation[Room] = Left("No room left")
-  costPerPerson[Validation].apply(fRoom)
+  println(value.run(Booking()).value)
 }

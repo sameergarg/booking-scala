@@ -3,7 +3,7 @@ import Domain._
 import cats.data.State
 import cats.implicits._
 
-class BookingService {
+object BookingService {
 
   type BookingState[A] = State[Booking, A]
 
