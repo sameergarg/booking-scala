@@ -35,14 +35,14 @@ class BookingService {
             period: Period,
             guest: Guest,
             reservationId: ReservationId): BookingState[Unit] = State { booking => {
-      val roomReserved = room.copy(booked = Reservation(reservationId, period, guest) :: room.booked)
-      val otherRooms = booking.rooms.filter(_ != room)
-      val newBooking = booking.copy(
-        rooms = roomReserved :: otherRooms,
-        events = ReservationMade(reservationId) :: booking.events
-      )
-      (newBooking, ())
-    }
+    val roomReserved = room.copy(booked = Reservation(reservationId, period, guest) :: room.booked)
+    val otherRooms = booking.rooms.filter(_ != room)
+    val newBooking = booking.copy(
+      rooms = roomReserved :: otherRooms,
+      events = ReservationMade(reservationId) :: booking.events
+    )
+    (newBooking, ())
+  }
   }
 
   // book vor VIP = book given room, if it does not exist then build it
@@ -52,19 +52,17 @@ class BookingService {
                view: Boolean,
                capacity: Int,
                period: Period
-             )(guest: Guest): Booking => (Booking, ReservationId) = ???
-
-  /*booking => {
-      val (fetchedRoomBooking, mayBeRoom: Option[Room]) = fetchRoom(no)(booking)
-      val (addedRoomBooking, newRoom) = mayBeRoom.fold {
-        addRoom(no, floor, view, capacity)(fetchedRoomBooking)
-      } {
-        room => (fetchedRoomBooking: Booking, room)
-      }
-      val resId = currentReservationId.run(addedRoomBooking).value._2 + 1
-      val (newBooking, _) = book(newRoom, period, guest, resId)(addedRoomBooking)
-      (newBooking, resId)
-    }*/
+             )(guest: Guest): BookingState[ReservationId] = State { booking =>
+    val (fetchedRoomBooking, mayBeRoom: Option[Room]) = fetchRoom(no).run(booking).value
+    val (addedRoomBooking, newRoom) = mayBeRoom.fold {
+      addRoom(no, floor, view, capacity).run(fetchedRoomBooking).value
+    } {
+      room => (fetchedRoomBooking: Booking, room)
+    }
+    val resId = currentReservationId.run(addedRoomBooking).value._2 + 1
+    val (newBooking, _) = book(newRoom, period, guest, resId).run(addedRoomBooking).value
+    (newBooking, resId)
+  }
 
 }
 
