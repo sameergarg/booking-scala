@@ -1,6 +1,7 @@
 import Domain.Event.{ReservationMade, RoomAdded, RoomFetched}
 import Domain._
 import cats.data.State
+import cats.implicits._
 
 class BookingService {
 
@@ -52,18 +53,13 @@ class BookingService {
                view: Boolean,
                capacity: Int,
                period: Period
-             )(guest: Guest): BookingState[ReservationId] = State { booking =>
-    val (fetchedRoomBooking, mayBeRoom: Option[Room]) = fetchRoom(no).run(booking).value
-    val (addedRoomBooking, newRoom) = mayBeRoom.fold {
-      addRoom(no, floor, view, capacity).run(fetchedRoomBooking).value
-    } {
-      room => (fetchedRoomBooking: Booking, room)
-    }
-    val resId = currentReservationId.run(addedRoomBooking).value._2 + 1
-    val (newBooking, _) = book(newRoom, period, guest, resId).run(addedRoomBooking).value
-    (newBooking, resId)
-  }
-
+             )(guest: Guest): BookingState[ReservationId] = for {
+    maybeRoom <- fetchRoom(no)
+    room <- maybeRoom.fold(addRoom(no, floor, view, capacity))(_.pure[BookingState])
+    currentResId <- currentReservationId
+    resId = currentResId + 1
+    _ <- book(room, period, guest, resId)
+  } yield resId
 }
 
 
