@@ -1,12 +1,10 @@
 
 object MonadTransformer {
 
-  def calculate(input: String): Option[Int] = ???
+  def calculate(input: String): Validation[Option[Int]] = ???
 
-  val increment: Option[Int] = for {
-    v <- calculate("some")
-  } yield (v + 1)
+  val increment: Option[Int] = ???
 
 
-
+  type Validation[A] = Either[String, A]
 }
