@@ -23,4 +23,6 @@ object Main extends App {
 
   reservationIds.unsafeRunAsync(_.foreach(println))
 
+  println(MonadTransformer.calculate("some").value)
+  println(MonadTransformer.calculate("1").value)
 }

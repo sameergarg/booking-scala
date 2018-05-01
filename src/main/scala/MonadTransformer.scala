@@ -7,7 +7,7 @@ object MonadTransformer {
 
   def calculate(input: String): Validation[Int] = increment(input)
 
-  val increment: String => Validation[Int] = str => {
+  private val increment: String => Validation[Int] = str => {
 
     def parseToInt(i: String): Either[String, Option[Int]] = Try(i.toInt) match {
       case Success(i) => Some(i+1).asRight[String]
