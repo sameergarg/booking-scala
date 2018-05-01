@@ -13,7 +13,9 @@ object Main extends App {
     resId2 <- BookingService.bookVip("102", floor = 1, view = true, capacity = 5, period)(guest)
   } yield List(resId1, resId2)
 
+  //interpreter
   val reservationIds = for {
+    guest       <- findGuest
     initBooking <- fetchBooking()
     (booking, resIds) = program.run(initBooking).value
     _ <- updateBooking(booking)
