@@ -1,17 +1,46 @@
+import BookingAlgebra.BookingState
 import Domain.Event.{ReservationMade, RoomAdded, RoomFetched}
 import Domain._
-import cats.{Applicative, Monad}
-import cats.data.{State, StateT}
+import cats.Monad
+import cats.data.StateT
 import cats.implicits._
 
-import language.higherKinds
+import scala.language.higherKinds
 
-object BookingService {
+trait BookingAlgebra[F[_]] {
+
+
+  def addRoom(
+              no: String,
+              floor: Int,
+              view: Boolean,
+              capacity: Int
+            ): BookingState[F, Room]
+
+  def fetchRoom(no: String): BookingState[F, Option[Room]]
+
+  def currentReservationId(): BookingState[F, ReservationId]
+
+  def book(
+           room: Room,
+           period: Period,
+           guest: Guest,
+           reservationId: ReservationId): BookingState[F, Unit]
+
+}
+
+object BookingAlgebra {
 
   type BookingState[F[_], A] = StateT[F, Booking, A]
 
+  def apply[F[_]: BookingAlgebra]: BookingAlgebra[F] = implicitly
+}
+
+class BookingInterpreter[F[_]: Monad] extends BookingAlgebra[F] {
+
+
   // adds room to booking, stores an event
-  def addRoom[F[_]: Monad](
+  def addRoom(
                no: String,
                floor: Int,
                view: Boolean,
@@ -23,18 +52,18 @@ object BookingService {
   })
 
   // returns current reservation id
-  private def currentReservationId[F[_]: Monad]: BookingState[F, ReservationId] = StateT[F, Booking, ReservationId] {
+  def currentReservationId(): BookingState[F, ReservationId] = StateT[F, Booking, ReservationId] {
     booking => (booking, booking.rooms.flatMap(_.booked).map(_.id).foldLeft(0)(math.max(_, _))).pure[F]
   }
 
   // fetches room by number
-  def fetchRoom[F[_]: Monad](no: String): BookingState[F, Option[Room]] = StateT[F, Booking, Option[Room]] { booking =>
+  def fetchRoom(no: String): BookingState[F, Option[Room]] = StateT[F, Booking, Option[Room]] { booking =>
     (booking.copy(events = RoomFetched(no) :: booking.events),
       booking.rooms.filter(_.no == no).headOption).pure[F]
   }
 
   // books a guest to a room for a given period
-  def book[F[_]: Monad](
+  def book(
             room: Room,
             period: Period,
             guest: Guest,
@@ -49,19 +78,24 @@ object BookingService {
     }
   }
 
+
+}
+
+object BookingProgram {
+
   // book vor VIP = book given room, if it does not exist then build it
-  def bookVip[F[_]: Monad](
+  def bookVip[F[_]: Monad: BookingAlgebra](
                no: String,
                floor: Int,
                view: Boolean,
                capacity: Int,
                period: Period
              )(guest: Guest): BookingState[F, ReservationId] = for {
-    maybeRoom <- fetchRoom[F](no)
-    room <- maybeRoom.fold(addRoom[F](no, floor, view, capacity))((room:Room)  => room.pure[StateT[F, Booking, ?]])
-    currentResId <- currentReservationId[F]
+    maybeRoom <- BookingAlgebra[F].fetchRoom(no)
+    room <- maybeRoom.fold(BookingAlgebra[F].addRoom(no, floor, view, capacity))((room:Room)  => room.pure[StateT[F, Booking, ?]])
+    currentResId <- BookingAlgebra[F].currentReservationId
     resId = currentResId + 1
-    _ <- book[F](room, period, guest, resId)
+    _ <- BookingAlgebra[F].book(room, period, guest, resId)
   } yield resId
 }
 
