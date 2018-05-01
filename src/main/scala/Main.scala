@@ -15,7 +15,7 @@ object Main extends App {
 
   //interpreter
   val reservationIds = for {
-    guest       <- findGuest
+    //guest       <- findGuest
     initBooking <- fetchBooking()
     (booking, resIds) = program.run(initBooking).value
     _ <- updateBooking(booking)
