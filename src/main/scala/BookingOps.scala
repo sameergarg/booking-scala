@@ -4,7 +4,7 @@ import cats.{Applicative, Functor, Monad}
 
 import scala.language.higherKinds
 
-object BookingSystem {
+object BookingOps {
 
   val pickAvailable: (Period, List[Room]) => List[Room] = (period, rooms) => rooms.filter(!_.booked.map(_.period).contains(period))
   val filterWithView: List[Room] => List[Room] = _.filter(_.view)
